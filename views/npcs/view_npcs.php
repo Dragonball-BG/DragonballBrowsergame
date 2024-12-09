@@ -14,7 +14,7 @@
                 <div class="npc-actions">
                     <a href="index.php?route=interact_with_npc&npc_id=<?php echo $npc['npc_id']; ?>" class="npc-interact-button">Talk</a>
                     <?php if ($npc['is_fightable']): ?>
-                        <a href="index.php?route=start_fight&npc_id=<?php echo $npc['npc_id']; ?>" class="npc-fight-button">Fight</a>
+                        <a href="index.php?route=start_combat&npc_id=<?php echo $npc['npc_id']; ?>" class="npc-fight-button">Fight</a>
                     <?php endif; ?>
                 </div>
             </div>

@@ -8,7 +8,6 @@ Session::start();
 $isLoggedIn = Session::has('user_id');
 $hasCharacter = Session::has('selected_character_id');
 
-require_once 'helpers/CharacterHelper.php';
 require_once 'controllers/CharacterController.php';
 
 include_once 'views/head.php';
@@ -21,39 +20,66 @@ require_once 'controllers/QuestController.php';
 require_once 'controllers/NPCController.php';
 
 // Instantiate Helper
-$characterHelper = new CharacterHelper();
+$characterModel = new CharacterModel();
 if (Session::get('selected_character_id')) {
     $characterId = Session::get('selected_character_id');
-    $characterHelper->checkAndUpdateLevel($characterId);
+    $characterModel->checkAndUpdateLevel($characterId);
 }
 
 // Define routes
+
+// Authentication Routes (Login/Logout)
 $routes = [
-    'login' => 'LoginController@showLoginForm',
-    'login_check' => 'LoginController@login',
-    'logout' => 'LoginController@logout',
-    'register' => 'RegisterController@showRegisterForm',
-    'store_user' => 'RegisterController@storeUser',
-    'character_picker' => 'CharacterPickerController@index', // Route to Character Picker
+    // LoginController
+    'login' => 'LoginController@showLoginForm', // Show login form
+    'login_check' => 'LoginController@login', // Handle login action
+    'logout' => 'LoginController@logout', // Log out the user
+
+    // RegisterController
+    'register' => 'RegisterController@showRegisterForm', // Show registration form
+    'store_user' => 'RegisterController@storeUser', // Store a new user
+];
+
+// Character Management Routes
+$routes += [
+    // CharacterPickerController
+    'character_picker' => 'CharacterPickerController@index', // Show character picker
     'select_character' => 'CharacterPickerController@selectCharacter', // Select a character
-    'switch_character' => 'CharacterController@switchCharacter',
-    'create_character' => 'CharacterPickerController@createCharacter', // View to create a character
-    'store_character' => 'CharacterPickerController@storeCharacter', // Save the new character
-    'delete_character' => 'CharacterPickerController@deleteCharacter', // Route to delete a character
-    'news' => 'NewsController@showNews', // Route to News
-    'quests' => 'QuestController@viewQuests',
-    'start_side_quest' => 'QuestController@startSideQuest',
-    'start_main_story_quest' => 'QuestController@startMainStoryQuest',
-    'interact_with_npc' => 'NPCController@interactWithNPC',
-    'view_npcs' => 'NPCController@viewNPCsByLocation',
-    'give_item' => 'NPCController@giveItem',
-    'refuse_item_non_hostile' => 'NPCController@refuseItemNonHostile',
-    'refuse_item' => 'NPCController@refuseItem',
-    'start_quest' => 'NPCController@startQuest',
-    'view_active_quests' => 'QuestController@viewActiveQuests',
-    'end_quest' => 'QuestController@endQuest',
-    'fail_quest' => 'QuestController@failQuest',
-    'view_character_profile' => 'CharacterController@viewProfile',
+    'create_character' => 'CharacterPickerController@createCharacter', // Show create character form
+    'store_character' => 'CharacterPickerController@storeCharacter', // Save a new character
+    'delete_character' => 'CharacterPickerController@deleteCharacter', // Delete a character
+
+    // CharacterController
+    'switch_character' => 'CharacterController@switchCharacter', // Switch between characters
+    'view_character_profile' => 'CharacterController@viewProfile', // View character profile
+];
+
+// NPC Interaction Routes
+$routes += [
+    // NPCController
+    'view_npcs' => 'NPCController@viewNPCsByLocation', // View NPCs by location
+    'interact_with_npc' => 'NPCController@interactWithNPC', // Interact with an NPC
+    'give_item' => 'NPCController@giveItem', // Give item to NPC
+    'refuse_item_non_hostile' => 'NPCController@refuseItemNonHostile', // Refuse item for non-hostile NPC
+    'refuse_item' => 'NPCController@refuseItem', // Refuse item for hostile NPC
+    'start_quest' => 'NPCController@startQuest', // Start a quest from NPC
+];
+
+// Quest Management Routes
+$routes += [
+    // QuestController
+    'quests' => 'QuestController@viewQuests', // View quests
+    'start_side_quest' => 'QuestController@startSideQuest', // Start a side quest
+    'start_main_story_quest' => 'QuestController@startMainStoryQuest', // Start a main story quest
+    'view_active_quests' => 'QuestController@viewActiveQuests', // View active quests
+    'end_quest' => 'QuestController@endQuest', // End a quest
+    'fail_quest' => 'QuestController@failQuest', // Mark a quest as failed
+];
+
+// General Routes
+$routes += [
+    // NewsController
+    'news' => 'NewsController@showNews', // Show news page
 ];
 
 $route = $_GET['route'] ?? 'login';
