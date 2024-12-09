@@ -1,24 +1,20 @@
 <?php
 
-require_once 'models/User.php';
-require_once 'helpers/Session.php';
+require_once 'models/UserModel.php';
 
-class LoginController
-{
-    private $user;
+class LoginController {
+    private $userModel;
 
-    public function __construct()
-    {
-        $this->user = new User();
+    public function __construct() {
+        $this->userModel = new UserModel();
     }
 
     /**
      * Show the login form.
      */
-    public function showLoginForm()
-    {
+    public function showLoginForm() {
         if (Session::has('user_id')) {
-            header("Location: index.php?route=character_picker");
+            $this->redirect('index.php?route=character_picker');
         }
         include 'views/login/login.php';
     }
@@ -26,51 +22,50 @@ class LoginController
     /**
      * Handle the login logic.
      */
-    public function login()
-    {
+    public function login() {
         $username = $_POST['username'] ?? '';
         $password = $_POST['password'] ?? '';
 
         // Validate inputs
         if (empty($username) || empty($password)) {
-            header("Location: index.php?route=login&error=missing_fields");
-            exit;
+            $this->redirect('index.php?route=login&error=missing_fields');
         }
 
         // Authenticate user
-        if (!$this->user->authenticate($username, $password)) {
-            // Check if the user is locked
-            $userDetails = $this->user->getUserByUsername($username);
+        if (!$this->userModel->authenticate($username, $password)) {
+            $userDetails = $this->userModel->getUserByUsername($username);
 
             if ($userDetails && $userDetails['is_locked']) {
-                header("Location: index.php?route=login&error=account_locked");
+                $this->redirect('index.php?route=login&error=account_locked');
             } else {
-                header("Location: index.php?route=login&error=invalid_credentials");
+                $this->redirect('index.php?route=login&error=invalid_credentials');
             }
-            exit;
         }
 
-        // Set user session data
-        $userDetails = $this->user->getDetails();
+        // Set session data for the authenticated user
+        $userDetails = $this->userModel->getDetails();
         Session::set('user_id', $userDetails['id']);
         Session::set('username', $userDetails['username']);
 
-        
-        if (Session::has('selected_character_id')) {
-            header("Location: index.php?route=dashboard");
-        } else {
-            header("Location: index.php?route=character_picker");
-        }
-        exit;
+        $route = Session::has('selected_character_id') ? 'dashboard' : 'character_picker';
+        $this->redirect("index.php?route=$route");
     }
 
     /**
      * Log out the user and destroy the session.
      */
-    public function logout()
-    {
+    public function logout() {
         Session::destroy();
-        header("Location: index.php?route=login");
+        $this->redirect('index.php?route=login');
+    }
+
+    /**
+     * Redirect to a specified route.
+     *
+     * @param string $route URL to redirect to.
+     */
+    private function redirect($route) {
+        header("Location: $route");
         exit;
     }
 }
